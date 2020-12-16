@@ -1,0 +1,479 @@
+---
+title: "Homework 1"
+author: "Süleyman Turancan Burucu"
+date: "11/9/2020"
+output: html_document
+---
+# Graphs of Different Datasets According to Turkey
+
+## 1) USD/TRY Exchange Rates from 01.2005 to 11.2020
+
+>As it can be seen below, the exchange rate of USD/TRY has followed these values, with concerning codes: 
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+exc <- read.table(file="hw1_data1.txt", header=TRUE)
+
+attach(exc)
+
+usdplot <- ggplot(exc, aes(date, usd))
+
+usdplot + geom_point(color="red") + geom_line() + 
+          labs(title = "USD/TRY at Each Month From 01.2010 to 11.2020", x = "Date (in months)", y = "USD-TRY Exchange Rate",  
+               caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/")
+
+# + geom_text(aes(label=months), angle = 90, size = 2, nudge_y = 0.2)
+# + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+save.image("hw1_data1_R.RData")
+
+ggsave("plot1.png", width = 80, height = 10, limitsize = FALSE)
+
+```
+
+><p> Its shape is not changing at all at the beginning, 01.2010, and following months. Yet, sometimes USD/TRY value increases a little bit and continues its route with higher values, like step functions. Besides, in the last years its shape is changing so rapidly because of these reasons:</p>
+1. Economical fluctuations' freqeuncies and their amplitudes due to domestic and foreign policies of the ruling party.
+2. Having a decreasing confidence level against Turkish economics concerning not only for consumers but also producers/investors.
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+trends_data1_line <- read.table(file="hw1_data1_trends_data.txt", header=TRUE)
+
+attach(trends_data1_line)
+
+data1plot <- ggplot(trends_data1_line, aes(number, amount))
+
+data1plot + geom_point(color="red") + geom_line() + 
+          labs(title = "Google Trends' Search Volume of the Word 'dolar'", x = "Date", y = "Amount",  
+               caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=dolar")
+
+save.image("hw1_data1_trends_data1_line.RData")
+
+ggsave("plot1-trends-line.png", width = 80, height = 10, limitsize = FALSE)
+
+```
+
+><p>When we look at the graph of the search volume of "dolar" term taken from Google Trends, we can see the similarity. These two graphs simile each other in general, the general trend between them is alike. In short, when one of them increases at any time, the other is, too. Also, if we compare different halves of each graphs, it can be concluded that shapes of each graph is changing significcantly. At the first half of the first graph taken from TCMB database, we have stable exchange rate but at the second half of the graph, we have unstable exchange rate that changes a  Also, year after year, its graph doesn't change significantly at the first time when the data are taken, but at the end the difference between years is much more. The same condition holds for the second graph, too. There is no similarity among each half each graph, i.e. distributions of each half is different than the other</p>
+
+><p>We can see the boxplots and histograms for each of them below, the TCMB's boxplot and histogram, also Google Trends', respectively:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+exc <- read.table(file="hw1_data1.txt", header=TRUE)
+
+attach(exc)
+
+usdplot <- ggplot(exc, aes(date, usd))
+
+usdplot + geom_boxplot() + 
+          labs(title = "Boxplot of USD/TRY at Each Month From 01.2010 to 11.2020", x = "Date (in months)", y = "USD-TRY Exchange Rate", caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/")
+
+save.image("hw1_data1_tcmb_data1_boxplot.RData")
+
+ggsave("plot1-tcmb-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+exc <- read.table(file="hw1_data1.txt", header=TRUE)
+
+attach(exc)
+
+usdplot <- ggplot(exc, aes(date, usd))
+
+usdplot + geom_boxplot() + 
+          labs(title = "Boxplot of Google Trends' Search Volume for the Term 'dolar'", x = "Date", y = "Amount", caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=dolar")
+
+save.image("hw1_data1_tcmb_data1_boxplot.RData")
+
+ggsave("plot1-tcmb-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+exc <- read.table(file="hw1_data1.txt", header=TRUE)
+
+attach(exc)
+
+usdplot <- ggplot(exc, aes(usd))
+
+usdplot + geom_histogram(bins = 60, color = "black") + 
+  labs(title = "Histogram of USD/TRY at Each Month From 01.2010 to 11.2020", x = "USD/TRY", y = "Total Months", caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/")
+
+save.image("hw1_data1_tcmb_data1_boxplot.RData")
+
+ggsave("plot1-tcmb-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+exc <- read.table(file="hw1_data1.txt", header=TRUE)
+
+attach(exc)
+
+usdplot <- ggplot(exc, aes(usd))
+
+usdplot + geom_histogram( bins = 60, color = "black") + 
+  labs(title = "Histogram of Google Trends' Search Volume for the Term 'dolar'", x = "USD/TRY", y = "Total Months", caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=dolar")
+
+save.image("hw1_data1_tcmb_data1_boxplot.RData")
+
+ggsave("plot1-tcmb-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+```
+
+
+
+
+
+
+## 2) Total Gold (kg) publicly-traded in Istanbul Stock Exchange Each Month From 01.2005 to 06.2018
+
+>As it can be seen below, the total amount of gold traded in Istanbul Stock Exchange (BIST) has followed these values, with concerning codes:
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+gold <- read.table(file="hw1_data2.txt", header=TRUE)
+
+attach(gold)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+usdplot <- ggplot(gold, aes(number, kg))
+
+
+usdplot + geom_point(color="blue") + geom_line() +
+  labs(title = "Total Gold (kg) publicly-traded in Istanbul Stock Exchange Each Month From 01.2010 to 06.2018", x = "Date", y = "Gold (kg)",  
+       caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/")
+
+
+save.image("hw1_data2_R.RData")
+
+ggsave("plot2.png", width = 65, height = 10, limitsize = FALSE)
+
+```
+
+
+>From Google Trends, search volume for "altın" is taken and its graph is drawn as it can be seen from below: 
+
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+gold_trends <- read.table(file="hw1_data2_trends_data.txt", header=TRUE)
+
+attach(gold_trends)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+goldplot <- ggplot(gold_trends, aes(number, amount))
+
+
+goldplot + geom_point(color="blue") + geom_line() +
+  labs(title = "Google Trends for Search Volume of the Term 'altın'", 
+       x = "Date", y = "Amount",  
+       caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=alt%C4%B1n")
+
+
+save.image("hw1_data2_trends.RData")
+
+ggsave("plot2-trends-line.png", width = 65, height = 10, limitsize = FALSE)
+
+```
+
+><p>Comparing both graphs related with the term "altın", first graph taken from the TCMB database shows that the first half of the data's shape is not similar to the other. Even both of them are ragged, the first half has more rags than the second half. Moreover, second half has more stable increases and decreases. Also, when comparing each year with the former one for each graph, the new year's distribution is not similar to before, i.e. amounts change each year significantly; especially for some years, there are more than significant changes. For the Google Trends' graph, first half and the second half of the graph seems to have more stable increases and decreases except some years, but its distribution definitely changes at the second half.</p>
+><p>Here below is the boxplots of each data, in order of TCMB's data and Google Trends' data:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+gold <- read.table(file="hw1_data2.txt", header=TRUE)
+
+attach(gold)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+usdplot <- ggplot(gold, aes(number, kg))
+
+
+usdplot + geom_boxplot() + 
+  labs(title = "Boxplot of Total Gold (kg) publicly-traded in Istanbul Stock Exchange Each Month From 01.2010 to 06.2018", x = "Date", y = "Gold (kg)",  
+       caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/")
+
+
+save.image("hw1_data2_tcmb_boxplot.RData")
+
+ggsave("plot2-tcmb-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+
+```
+
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+gold <- read.table(file="hw1_data2_trends_data.txt", header=TRUE)
+
+attach(gold)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+usdplot <- ggplot(gold, aes(number, amount))
+
+
+usdplot + geom_boxplot() + 
+  labs(title = "Boxplot of Google Trends' Search Volume of the Term 'altın'", x = "Date", y = "Gold (kg)",  
+       caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=alt%C4%B1n")
+
+
+save.image("hw1_data2_trends_boxplot.RData")
+
+ggsave("plot2-trends-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+gold <- read.table(file="hw1_data2.txt", header=TRUE)
+
+attach(gold)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+usdplot <- ggplot(gold, aes(kg))
+
+
+usdplot + geom_histogram( bins = 60, color = "black") + 
+  labs(title = "Histogram of Total Gold (kg) publicly-traded in Istanbul Stock Exchange Each Month From 01.2010 to 06.2018", x = "kg", y = "Months",  
+       caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/")
+
+
+save.image("hw1_data2_tcmb_boxplot.RData")
+
+ggsave("plot2-tcmb-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+gold <- read.table(file="hw1_data2_trends_data.txt", header=TRUE)
+
+attach(gold)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+usdplot <- ggplot(gold, aes(amount))
+
+
+usdplot + geom_histogram(bins = 60, color = "black") + 
+  labs(title = "Histogram of Google Trends' Search Volume of the Term 'altın'", x = "Date", y = "Gold (kg)",  
+       caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=alt%C4%B1n")
+
+
+save.image("hw1_data2_trends_boxplot.RData")
+
+ggsave("plot2-trends-boxplot.png", width = 10, height = 10, limitsize = FALSE)
+
+
+```
+
+## 3) Banks' Total Amount of Dollars (in millions) from 01.2012 to 08.2020
+><p>The amounts of dollars in millions are given below according to TCMB's data:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+bankusd <- read.table(file="hw1_data3.txt", header=TRUE)
+
+attach(bankusd)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+bankplot <- ggplot(bankusd, aes(number, amount))
+
+bankplot + geom_point(color="purple") + geom_line(color = "black") + geom_step(color="red", alpha=0.3) +
+  labs(title = "Banks' Total Amount of Dollars (in millions) From 01.2012 to 08.2020", x = "Date", y = "Dollars (in millions)",  
+       caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/") 
+
+save.image("hw1_data3_R.RData")
+
+ggsave("plot3.png", width = 25, height = 10, limitsize = FALSE)
+
+```
+
+><p>When we search for the term "döviz hesabı" in Google Trends, this graph can be taken:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+bankusd <- read.table(file="hw1_data3_trends_data.txt", header=TRUE)
+
+attach(bankusd)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+bankplot <- ggplot(bankusd, aes(number, amount))
+
+bankplot + geom_point(color="purple") + geom_line(color = "black") + geom_step(color="red", alpha=0.3) +
+  labs(title = "Google Trends' Search Volume for the Term 'döviz hesabı'", x = "Date", y = "Dollars (in millions)",  
+       caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=d%C3%B6viz%20hesab%C4%B1") 
+
+save.image("hw1_data3_trends_line.RData")
+
+ggsave("plot3-trends-line.png", width = 25, height = 10, limitsize = FALSE)
+
+```
+
+><p>From these graphs, it can be concluded that if each graph is halved and compared, TCMB's graph shows more linear shape besides its second half, when its shape is again increasing same before but it is not as ragged as before. Yet, in the second half of the TCMB's data, it can be observed that there is again increase but its increases make more great fluctuations. Also, if it is analyzed year after year, there is no similarity or stability, its values change every year.</p>
+><p>When it comes to examine the Google Trends' data, there is no similarity between the first half and the second half of the graph. Also, each year has different search volume amount not related to the former one. At the beginning, its shape is less ragged, but at the second half, its increase has more stable shape but again have rags but deeper than before. At the end of the graph, its shape has the greatest peaks and pits. In other words, its distribution is different at each half.</p>
+><p>Their boxplots and histograms are, starting from the TCMB's data, shown below:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+bankusd <- read.table(file="hw1_data3.txt", header=TRUE)
+
+attach(bankusd)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+bankplot <- ggplot(bankusd, aes(number, amount))
+
+bankplot + geom_boxplot() +
+  labs(title = "Banks' Total Amount of Dollars (in millions) From 01.2012 to 08.2020", x = "Date", y = "Dollars (in millions)",  
+       caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/") 
+
+save.image("hw1_data3_boxplot.RData")
+
+ggsave("plot3-tcmb-boxplot.png", width = 25, height = 10, limitsize = FALSE)
+
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+bankusd <- read.table(file="hw1_data3_trends_data.txt", header=TRUE)
+
+attach(bankusd)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+bankplot <- ggplot(bankusd, aes(number, amount))
+
+bankplot + geom_boxplot() +
+  labs(title = "Boxplot of Google Trends' Search Volume for the Term 'döviz hesabı'", x = "Date", y = "Dollars (in millions)",  
+       caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=d%C3%B6viz%20hesab%C4%B1") 
+
+save.image("hw1_data3_trends_boxplot.RData")
+
+ggsave("plot3-trends-boxplot.png", width = 25, height = 10, limitsize = FALSE)
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+bankusd <- read.table(file="hw1_data3.txt", header=TRUE)
+
+attach(bankusd)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+bankplot <- ggplot(bankusd, aes(amount))
+
+bankplot + geom_histogram(bins = 60, color = "black") +
+  labs(title = "Histogram of Banks' Total Amount of Dollars (in millions) From 01.2012 to 08.2020", x = "Amount (in millions)", y = "Months",  
+       caption = "https://evds2.tcmb.gov.tr/index.php?/evds/archiveMarket/collapse_0/5862/DataGroup/turkish/bie_dkdovizgn/") 
+
+save.image("hw1_data3_boxplot.RData")
+
+ggsave("plot3-tcmb-boxplot.png", width = 25, height = 10, limitsize = FALSE)
+
+
+```
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE}
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Assignments/1")
+
+bankusd <- read.table(file="hw1_data3_trends_data.txt", header=TRUE)
+
+attach(bankusd)
+
+library(ggplot2)
+library(knitr)
+library(markdown)
+
+bankplot <- ggplot(bankusd, aes(amount))
+
+bankplot + geom_histogram( bins=60, color = "black") +
+  labs(title = "Histogram of Google Trends' Search Volume for the Term 'döviz hesabı'", x = "Amount", y = "Months",  
+       caption = "https://trends.google.com/trends/explore?date=all&geo=TR&q=d%C3%B6viz%20hesab%C4%B1") 
+
+save.image("hw1_data3_trends_boxplot.RData")
+
+ggsave("plot3-trends-boxplot.png", width = 25, height = 10, limitsize = FALSE)
+
+```
