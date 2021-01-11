@@ -1,0 +1,3298 @@
+---
+title: "Süleyman Turancan Burucu IE360 HW3 RMD"
+author: "Süleyman Turancan Burucu"
+date: "1/10/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+# Forecasting Study of House Sales Statistics First Sale (HSS-1S)
+## **1. Introduction**
+
+>In brief, the relationship between House Sales Statistics - First Sale (HSS-1S), USD/TRY Exchange Rate, Weighted Average Interest Rates For Housing Loans Taken From Banks, Bullion Gold Selling Price TRY/Gram, Real Sector Confidence Index; Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks; and Housing, Water, Electricity, Gas, and Other Fuels Price Index are analyzed starting from 2013, January until November, 2020 to predict December, 2020.
+
+<p>To begin with, these topics are chosen exceptionally, since first sale house statistics is thought to somehow be affected by exchange rate which is used most in the world, average interest rates applied by banks, price of bullion gold in grams, confidence index in the real sector, deposit money banks' total domestic loan volumes, and lastly some housing related price indexes.</p>
+
+<p>As I remember, the American Dollar's value is increasing against Turkish Lira's steadily. Also, the price of gold in grams have been increasing, too. Moreover, this general increase nearly in every area of life have overtly influenced the prices of every object and some abstract figures that humankind have been using. Therefore, I decided to detect what elements can be related with the general price increase on the part of first sale house statistics.</p>
+
+<p>Firstly, I got the USD/TRY Exchange Rate. Why this is chosen can be explained in this way, American Dollar is one of the main exchange rates that affects the purchasing power. By saying purchasing power, it is intended that American Dollar is one of world standards that fixates not the prices of a subject, but also its value. For this reason, this exchange rate is worth to mention and be analyzed.</p>
+
+<p>After USD/TRY Exchange Rate, I got Weighted Average Interest Rates For Housing Loans Taken From Banks, meaning that the interest rate that is applied on mortgage loans. It is more precise than USD/TRY Exchange Rate's relationship with first house sales statistics because when the interest rate on the mortgage loans goes down, then people are prone to receive loan for their housing needs and people think that they can actualize their needs somehow in lower prices. Thence, Weighted Average Interest Rates For Housing Loans Taken From Banks is also worth to mention.</p>
+
+<p>Moreover, I got Bullion Gold Selling Price TRY/Gram, which also is another one of the world standards that fixates not the prices of a subject, but also its value. In brief, this one is also similar to American Dollar's vale against Turkish Lira.</p>
+
+<p>Also, Real Sector Confidence Index can be thought as one of the effecting factors. Since this value indicates the "confidence" of the sector, including construction sector and real estate sector, this index might affect first sales house statistics at first sight.</p>
+
+<p>Additionally, Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks can be thought as one of tha factors that affect the first sale house statistics with half an eye. This is because if deposit money banks have a great volume of money that can be credited, then this credits can be used for housing needs and may affect the first sale house statistics.</p>
+
+<p>One more, Housing, Water, Electricity, Gas, and Other Fuels Price Index can be thought as a factor that can affect the first sale house statistics just because if these housing-related indexes indicate great levels, it means that having one more house or starting a construction of a house might seem not wisely frmo economical perspective. The more the prices that housing related price indexes, the less the first sale house statistics, at first glance.</p>
+
+<p>Finally, other than independent resources as predictors, we can get predictors from the data itself. This situation exists a lot in the forecasting part we will cover up at oncoming parts</p>
+
+## **2. Possible Predictors and Their Graphs**
+>Before we start, I'm going to say where and why specific values of related predictors at forecasting period due to having a chance of checking the table easily and having fresh information.
+>At the beginning, let's start examining the House Sales Statistics - First Sale (HSS-1S) in a graph:
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+str(mydata)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#raw plot of the konutilkelsatis and geom_point + geom_line version
+date_df <- data.frame(date)
+usd_df <- data.frame(usd)
+ortfaiz_df <- data.frame(ortfaiz)
+kulcealtingr_df <- data.frame(kulcealtingr)
+rkge_df <- data.frame(rkge)
+kredihacmi_df <- data.frame(kredihacmi)
+konutvedigerfiyatindeksi_df <- data.frame(konutvedigerfiyatindeksi)
+konutilkelsatis_df <- data.frame(konutilkelsatis)
+year_df <- data.frame(year)
+
+konutilkelsatis_plot <- ggplot(data = mydata, aes(date, konutilkelsatis, color = year, size = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+    labs(title = "Plot of House Sales Statistics - First Sale (HSS-1S)" , 
+       x = "Date (in month)", y = "House Sales Statistics - First Sale",
+       size="Year",col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+konutilkelsatis_plot + scale_color_gradient(low="purple", high="red")
+```
+<p></p>
+>Also, we should check the possible predictors one by one. First of all, USD/TRY Exchange Rate seems that it has a trend. Therefore, we need to make it stationary to be used in forecasting procedure by taking the differences of consecutive values. At the end, the mean of the differences of USD/TRY value is added. Better Ljung-Box test p-value is gotten (0.01935 is better than <2.2e-16) and means that we have less but not zero correlation. Therefore, in forecasting period, we are going to use the USD/TRY Exchange Rate's squared values to predict.
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+str(mydata)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#raw plot of the konutilkelsatis and geom_point + geom_line version
+date_df <- data.frame(date)
+usd_df <- data.frame(usd)
+ortfaiz_df <- data.frame(ortfaiz)
+kulcealtingr_df <- data.frame(kulcealtingr)
+rkge_df <- data.frame(rkge)
+kredihacmi_df <- data.frame(kredihacmi)
+konutvedigerfiyatindeksi_df <- data.frame(konutvedigerfiyatindeksi)
+konutilkelsatis_df <- data.frame(konutilkelsatis)
+year_df <- data.frame(year)
+
+usd_plot1 <- ggplot(data = mydata, aes(date, usd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_plot2 <- usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+
+diffusd <- c(diff(usd), mean(diff(usd)))
+mydata[,diff_usd := diffusd]
+
+diff_usd_plot1 <- ggplot(data = mydata, aes(date, diffusd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diff_usd_plot2 <- diff_usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+#Box.test(diffusd, lag=12, type = "Ljung-Box")
+##############################################
+
+##############################################
+#par ile toplu olarak çizdirmece
+#grid.arrange(usd_plot2, ortfaiz_plot2, kulcealtingr_plot2, 
+#             rkge_plot2, kredihacmi_plot2, konutvedigerfiyatindeksi_plot2,
+#             ncol=3, nrow = 2)
+##############################################
+usd_plot2
+diff_usd_plot2
+#ortfaiz_plot2
+#kulcealtingr_plot2
+#rkge_plot2
+#kredihacmi_plot2
+#konutvedigerfiyatindeksi_plot2
+```
+<p></p>
+>These are the plots of Weighted Average Interest Rates For Housing Loans Taken From Banks. When the Ljung-Box test p-value is examined, the correlation is unfortunately not be removed (1.154e-05 is gotten at best). Therefore, in forecasting period, we are going to use the USD/TRY Exchange Rate's squared values to predict.
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#raw plot of the konutilkelsatis and geom_point + geom_line version
+date_df <- data.frame(date)
+usd_df <- data.frame(usd)
+ortfaiz_df <- data.frame(ortfaiz)
+kulcealtingr_df <- data.frame(kulcealtingr)
+rkge_df <- data.frame(rkge)
+kredihacmi_df <- data.frame(kredihacmi)
+konutvedigerfiyatindeksi_df <- data.frame(konutvedigerfiyatindeksi)
+konutilkelsatis_df <- data.frame(konutilkelsatis)
+year_df <- data.frame(year)
+
+konutilkelsatis_plot <- ggplot(data = mydata, aes(date, konutilkelsatis, color = year, size = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+    labs(title = "Plot of House Sales Statistics - First Sale (HSS-1S)" , 
+       x = "Date (in month)", y = "House Sales Statistics - First Sale",
+       size="Year",col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+#konutilkelsatis_plot + scale_color_gradient(low="purple", high="red")
+
+##############################################
+
+##############################################
+diffortfaiz <- c(diff(ortfaiz), mean(diff(ortfaiz)))
+mydata[,diff_ortfaiz := diffortfaiz]
+ortfaiz_square <- c(ortfaiz*ortfaiz)
+mydata[,ortfaizsquare := ortfaiz_square]
+
+ortfaiz_plot1 <- ggplot(data = mydata, aes(date, ortfaiz, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Weighted Average Interest Rates\nFor Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_plot2 <- ortfaiz_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffortfaiz_plot1 <- ggplot(data = mydata, aes(date, diffortfaiz, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted\nAverage Interest Rates For\nHousing Loans Taken From Banks" ,
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffortfaiz_plot2 <- diffortfaiz_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diff(ortfaiz), lag=12, type = "Ljung-Box")
+############################################
+
+##############################################
+ortfaiz_plot2
+diffortfaiz_plot2
+#kulcealtingr_plot2
+#rkge_plot2
+#kredihacmi_plot2
+#konutvedigerfiyatindeksi_plot2
+```
+
+<p></p>
+>These are the plots of Bullion Gold Selling Price TRY/Gram. When the Ljung-Box test p-value is examined, the correlation is somewhat removed (0.06947 is gotten at best). We may hope that it is going to be used in the forecast period at degree of 1 but even the correlation between House Sales Statistics - First Sale (HSS-1S) and Bullion Gold Selling Price TRY/Gram is not such significant, its squared values are used in the forecasting period due to getting great values.
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+str(mydata)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+diffkulcealtingr <- c(diff(kulcealtingr), mean(diff(kulcealtingr)))
+mydata[,diff_kulcealtingr := diffkulcealtingr]
+kulcealtingr_square <- c(kulcealtingr*kulcealtingr)
+mydata[,kulcealtingrsquare := kulcealtingr_square]
+
+kulcealtingr_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Bullion Gold\nSelling Price TRY/Gram" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_plot2 <- kulcealtingr_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkulcealtingr_plot1 <- ggplot(data = mydata, aes(date, diffkulcealtingr, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For\nHousing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkulcealtingr_plot2 <- diffkulcealtingr_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkulcealtingr, lag=12, type = "Ljung-Box")
+############################################
+
+##############################################
+kulcealtingr_plot2
+diffkulcealtingr_plot2
+#rkge_plot2
+#kredihacmi_plot2
+#konutvedigerfiyatindeksi_plot2
+```
+
+<p></p>
+>These are the plots of Real Sector Confidence Index. When the Ljung-Box test p-value is examined, the correlation is somewhat removed (0.1464 is gotten at best). Since we have gotten a great test value, we can use the consecutive differences of Real Sector Confidence Index as a predictor.
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+str(mydata)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#rkge çizdirmece
+diffrkge <- c(diff(rkge), mean(diff(rkge)))
+mydata[,diff_rkge := diffrkge]
+rkge_square <- c(rkge*rkge)
+mydata[,rkgesquare := rkge_square]
+
+rkge_plot1 <- ggplot(data = mydata, aes(date, rkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+rkge_plot2 <- rkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffrkge_plot1 <- ggplot(data = mydata, aes(date, diffrkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of\nReal Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffrkge_plot2 <- diffrkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffrkge, lag=12, type = "Ljung-Box")
+##############################################
+rkge_plot2
+diffrkge_plot2
+```
+
+<p></p>
+>These are the plots of Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks. When the Ljung-Box test p-value is examined, the correlation is somewhat removed (0.1817 is gotten at best). Even we have gotten a great test value, we don't use the consecutive differences of Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks as a predictor since without this, forecast gives better result.
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+str(mydata)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#kredihacmi çizdirmece
+diffkredihacmi <- c(diff(kredihacmi), mean(diff(kredihacmi)))
+mydata[,diff_kredihacmi := diffkredihacmi]
+kredihacmi_square <- c(kredihacmi*kredihacmi)
+mydata[,kredihacmisquare := kredihacmi_square]
+
+kredihacmi_plot1 <- ggplot(data = mydata, aes(date, kredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kredihacmi_plot2 <- kredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkredihacmi_plot1 <- ggplot(data = mydata, aes(date, diffkredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkredihacmi_plot2 <- diffkredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkredihacmi, lag=12, type = "Ljung-Box")
+#############################################
+kredihacmi_plot2
+diffkredihacmi_plot2
+```
+
+<p></p>
+>These are the plots of Housing, Water, Electricity, Gas, and Other Fuels Price Index. When the Ljung-Box test p-value is examined, the correlation is somewhat removed (2.139e-10 is gotten at best). Since we don't get a better value from Ljung-Box test besides not getting a better value when prediction is done, this one is not going to be used as a predictor.
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+str(mydata)
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+#############################################
+#konutvedigerfiyatendeksi çizdirmece
+diffkonutvedigerfiyatindeksi <- c(diff(konutvedigerfiyatindeksi), mean(diff(konutvedigerfiyatindeksi)))
+mydata[,diff_konutvedigerfiyatindeksi := diffkonutvedigerfiyatindeksi]
+konutvedigerfiyatindeksi_square <- c(konutvedigerfiyatindeksi*konutvedigerfiyatindeksi)
+mydata[,konutvedigerfiyatindeksisquare := konutvedigerfiyatindeksi_square]
+
+konutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, konutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Housing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+konutvedigerfiyatindeksi_plot2 <- konutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+
+diffkonutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, diffkonutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of\nHousing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkonutvedigerfiyatindeksi_plot2 <- diffkonutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkonutvedigerfiyatindeksi, lag=12, type = "Ljung-Box")
+#############################################
+konutvedigerfiyatindeksi_plot2
+diffkonutvedigerfiyatindeksi_plot2
+```
+
+<p></p>
+## **3. Corelogram Among Predictors and House Sales Statistics - First Sale (HSS-1S) and Forecast Model**
+>We are going to see the correlations between each predictor, not the factor ones just numeric ones, and first sale house statistics. Let's see:
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+
+##############################################
+
+
+##############################################
+#summary of the raw data in one table showing min max etc.
+summary(ortfaiz)
+summary(kulcealtingr)
+summary(rkge)
+summary(kredihacmi)
+summary(konutvedigerfiyatindeksi)
+
+summary_usd <- c(1.770,2.310,3.470,3.838,5.415,8.020)
+summary_ortfaiz <- c(8.30,11.07,12.59,13.58,14.15,28.95)
+summary_kulcealtingr <- c(80.32,95.22,132.20,172.74,228.27,488.86)
+summary_rkge <- c( 66.8,100.0,104.1,103.4,108.6,114.3)
+summary_kredihacmi <- c(7.172e+08,1.203e+09,1.654e+09,1.769e+09,2.305e+09,3.452e+09)
+summary_konutvedigerfiyatindeksi <- c(258.9,289.6,327.0,355.9,430.4,530.6)
+
+rawsummary <- data.frame(summary_usd, summary_ortfaiz, summary_kulcealtingr, 
+                         summary_rkge, summary_kredihacmi, summary_konutvedigerfiyatindeksi)
+names(rawsummary)[1] <- "USD/TRY Exchange Rate"
+names(rawsummary)[2] <- "Weighted Average Interest Rates For Housing Loans Taken From Banks (WAIR)"
+names(rawsummary)[3] <- "Bullion Gold Selling Price TRY/gram (Gold/gr)"
+names(rawsummary)[4] <- "Real Sector Confidence Index (RSCI)"
+names(rawsummary)[5] <- "Monthly, Domestic Loans, Banking Sector (in Thousand TRY) for Deposit Money Banks (Domestic Loans)"
+names(rawsummary)[6] <- "Housing, Water, Electricity, Gas, and Other Fuels Price Index (Domestic Loans)"
+
+rownames(rawsummary)[1] <- "Min."
+rownames(rawsummary)[2] <- "1st Qu."
+rownames(rawsummary)[3] <- "Median"
+rownames(rawsummary)[4] <- "Mean"
+rownames(rawsummary)[5] <- "3rd Qu."
+rownames(rawsummary)[6] <- "Max."
+
+##############################################
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#raw plot of the konutilkelsatis and geom_point + geom_line version
+date_df <- data.frame(date)
+usd_df <- data.frame(usd)
+ortfaiz_df <- data.frame(ortfaiz)
+kulcealtingr_df <- data.frame(kulcealtingr)
+rkge_df <- data.frame(rkge)
+kredihacmi_df <- data.frame(kredihacmi)
+konutvedigerfiyatindeksi_df <- data.frame(konutvedigerfiyatindeksi)
+konutilkelsatis_df <- data.frame(konutilkelsatis)
+year_df <- data.frame(year)
+
+konutilkelsatis_plot <- ggplot(data = mydata, aes(date, konutilkelsatis, color = year, size = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+    labs(title = "Plot of House Sales Statistics - First Sale (HSS-1S)" , 
+       x = "Date (in month)", y = "House Sales Statistics - First Sale",
+       size="Year",col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+#konutilkelsatis_plot + scale_color_gradient(low="purple", high="red")
+#############################################
+
+##############################################
+#usd plot larını çizdirmece
+
+diffusd <- c(diff(usd), mean(diff(usd)))
+mydata[,diff_usd := diffusd]
+usd_square <- c(usd*usd)
+mydata[,usdsquare := usd_square]
+
+usd_plot1 <- ggplot(data = mydata, aes(date, usd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_plot2 <- usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diff_usd_plot1 <- ggplot(data = mydata, aes(date, diffusd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diff_usd_plot2 <- diff_usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+usd_square_plot1 <- ggplot(data = mydata, aes(date, usd_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate Square" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_square_plot2 <- usd_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+##############################################
+
+##############################################
+diffortfaiz <- c(diff(ortfaiz), mean(diff(ortfaiz)))
+mydata[,diff_ortfaiz := diffortfaiz]
+ortfaiz_square <- c(ortfaiz*ortfaiz)
+mydata[,ortfaizsquare := ortfaiz_square]
+
+ortfaiz_plot1 <- ggplot(data = mydata, aes(date, ortfaiz, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Weighted Average Interest Rates For Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_plot2 <- ortfaiz_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+ortfaiz_square_plot1 <- ggplot(data = mydata, aes(date, ortfaiz_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_square_plot2 <- ortfaiz_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diff(ortfaiz), lag=12, type = "Ljung-Box")
+############################################
+
+##############################################
+#kulcealtingr çizdirmece
+diffkulcealtingr <- c(diff(kulcealtingr), mean(diff(kulcealtingr)))
+mydata[,diff_kulcealtingr := diffkulcealtingr]
+kulcealtingr_square <- c(kulcealtingr*kulcealtingr)
+mydata[,kulcealtingrsquare := kulcealtingr_square]
+
+kulcealtingr_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Bullion Gold\nSelling Price TRY/Gram" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_plot2 <- kulcealtingr_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+kulcealtingr_square_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For\nHousing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_square_plot2 <- kulcealtingr_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+#Box.test(diffkulcealtingr, lag=12, type = "Ljung-Box")
+#############################################
+
+##############################################
+#rkge çizdirmece
+diffrkge <- c(diff(rkge), mean(diff(rkge)))
+mydata[,diff_rkge := diffrkge]
+rkge_square <- c(rkge*rkge)
+mydata[,rkgesquare := rkge_square]
+
+rkge_plot1 <- ggplot(data = mydata, aes(date, rkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+rkge_plot2 <- rkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffrkge_plot1 <- ggplot(data = mydata, aes(date, diffrkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffrkge_plot2 <- diffrkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffrkge, lag=12, type = "Ljung-Box")
+##############################################
+
+##############################################
+#kredihacmi çizdirmece
+diffkredihacmi <- c(diff(kredihacmi), mean(diff(kredihacmi)))
+mydata[,diff_kredihacmi := diffkredihacmi]
+kredihacmi_square <- c(kredihacmi*kredihacmi)
+mydata[,kredihacmisquare := kredihacmi_square]
+
+kredihacmi_plot1 <- ggplot(data = mydata, aes(date, kredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kredihacmi_plot2 <- kredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkredihacmi_plot1 <- ggplot(data = mydata, aes(date, diffkredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkredihacmi_plot2 <- diffkredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkredihacmi, lag=12, type = "Ljung-Box")
+#############################################
+
+#############################################
+#konutvedigerfiyatendeksi çizdirmece
+diffkonutvedigerfiyatindeksi <- c(diff(konutvedigerfiyatindeksi), mean(diff(konutvedigerfiyatindeksi)))
+mydata[,diff_konutvedigerfiyatindeksi := diffkonutvedigerfiyatindeksi]
+konutvedigerfiyatindeksi_square <- c(konutvedigerfiyatindeksi*konutvedigerfiyatindeksi)
+mydata[,konutvedigerfiyatindeksisquare := konutvedigerfiyatindeksi_square]
+
+konutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, konutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Housing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+konutvedigerfiyatindeksi_plot2 <- konutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkonutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, diffkonutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of\nHousing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkonutvedigerfiyatindeksi_plot2 <- diffkonutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkonutvedigerfiyatindeksi, lag=12, type = "Ljung-Box")
+#############################################
+
+##############################################
+#regressors
+
+#adding a one more predictor for higher variance after 2017's end which is equal to 1 starting from 2018
+mydata[year < "2018", greater2014 := 0]
+mydata[year >= "2018", greater2014 := 1]
+
+#adding a 2 more predictor about quantile 0.05 and quantile 0.95
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.05), quant5:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.05), quant5:=1]
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.95), quant95:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.95), quant95:=1]
+
+#adding a 2 more predictor about quantile 0.25 and quantile 0.75
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.25), quant25:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.25), quant25:=1]
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.75), quant75:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.75), quant75:=1]
+
+#adding a predictor which is the mean of each month
+mydata[, ifmonth_any := c(rep(c(1:12),7), c(1:11))]
+mydata[, mean_month := mean(konutilkelsatis), by  = mydata$ifmonth_any]
+
+#adding a predictor which is the differences of each month's konutilkelsatis + 1.ayların difference ortalaması
+mydata[, diff_konutilkelsatis := c(diff(konutilkelsatis), -29730)]
+
+#adding a predictor which is the differences of each month's konutilkelsatis + 1.ayların ortalaması
+mydata[konutilkelsatis < mean(mydata$konutilkelsatis), ifgreaterthan_mean := 0]
+mydata[konutilkelsatis >= mean(mydata$konutilkelsatis), ifgreaterthan_mean := 1]
+##############################################
+
+##############################################
+#ilk correlogram
+data_for_correlogram <- data.table(konutilkelsatis,diffusd,usd_square, ortfaiz_square, diffrkge, 
+                                   diffkulcealtingr,kulcealtingr_square,mydata$mean_month,
+                                   mydata$diff_konutilkelsatis)
+
+ggpairs(data_for_correlogram, 
+        title="Correlogram Among Potential Predictors",
+        lower = list(continuous = wrap("smooth", alpha = 0.8, size=1.2, shape = 1),
+                     discrete = "blank", combo="blank"),
+        diag = list(discrete="barDiag", continuous = wrap("densityDiag", alpha=0.5 )),
+        upper = list(combo = wrap("box_no_facet", alpha=0.5)),
+        ggplot2::aes(method = "pearson"))
+
+####################################
+
+```
+
+
+## **4. Prediction Model**
+>We are going to see the model and its predictors' significance one by one and in general. Let's see:
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "markup"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+
+##############################################
+
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#raw plot of the konutilkelsatis and geom_point + geom_line version
+date_df <- data.frame(date)
+usd_df <- data.frame(usd)
+ortfaiz_df <- data.frame(ortfaiz)
+kulcealtingr_df <- data.frame(kulcealtingr)
+rkge_df <- data.frame(rkge)
+kredihacmi_df <- data.frame(kredihacmi)
+konutvedigerfiyatindeksi_df <- data.frame(konutvedigerfiyatindeksi)
+konutilkelsatis_df <- data.frame(konutilkelsatis)
+year_df <- data.frame(year)
+
+konutilkelsatis_plot <- ggplot(data = mydata, aes(date, konutilkelsatis, color = year, size = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+    labs(title = "Plot of House Sales Statistics - First Sale (HSS-1S)" , 
+       x = "Date (in month)", y = "House Sales Statistics - First Sale",
+       size="Year",col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+#konutilkelsatis_plot + scale_color_gradient(low="purple", high="red")
+#############################################
+
+##############################################
+#usd plot larını çizdirmece
+
+diffusd <- c(diff(usd), mean(diff(usd)))
+mydata[,diff_usd := diffusd]
+usd_square <- c(usd*usd)
+mydata[,usdsquare := usd_square]
+
+usd_plot1 <- ggplot(data = mydata, aes(date, usd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_plot2 <- usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diff_usd_plot1 <- ggplot(data = mydata, aes(date, diffusd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diff_usd_plot2 <- diff_usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+usd_square_plot1 <- ggplot(data = mydata, aes(date, usd_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate Square" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_square_plot2 <- usd_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+##############################################
+
+##############################################
+diffortfaiz <- c(diff(ortfaiz), mean(diff(ortfaiz)))
+mydata[,diff_ortfaiz := diffortfaiz]
+ortfaiz_square <- c(ortfaiz*ortfaiz)
+mydata[,ortfaizsquare := ortfaiz_square]
+
+ortfaiz_plot1 <- ggplot(data = mydata, aes(date, ortfaiz, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Weighted Average Interest Rates For Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_plot2 <- ortfaiz_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+ortfaiz_square_plot1 <- ggplot(data = mydata, aes(date, ortfaiz_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_square_plot2 <- ortfaiz_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diff(ortfaiz), lag=12, type = "Ljung-Box")
+############################################
+
+##############################################
+#kulcealtingr çizdirmece
+diffkulcealtingr <- c(diff(kulcealtingr), mean(diff(kulcealtingr)))
+mydata[,diff_kulcealtingr := diffkulcealtingr]
+kulcealtingr_square <- c(kulcealtingr*kulcealtingr)
+mydata[,kulcealtingrsquare := kulcealtingr_square]
+
+kulcealtingr_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Bullion Gold\nSelling Price TRY/Gram" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_plot2 <- kulcealtingr_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+kulcealtingr_square_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For\nHousing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_square_plot2 <- kulcealtingr_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+#Box.test(diffkulcealtingr, lag=12, type = "Ljung-Box")
+#############################################
+
+##############################################
+#rkge çizdirmece
+diffrkge <- c(diff(rkge), mean(diff(rkge)))
+mydata[,diff_rkge := diffrkge]
+rkge_square <- c(rkge*rkge)
+mydata[,rkgesquare := rkge_square]
+
+rkge_plot1 <- ggplot(data = mydata, aes(date, rkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+rkge_plot2 <- rkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffrkge_plot1 <- ggplot(data = mydata, aes(date, diffrkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffrkge_plot2 <- diffrkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffrkge, lag=12, type = "Ljung-Box")
+##############################################
+
+##############################################
+#kredihacmi çizdirmece
+diffkredihacmi <- c(diff(kredihacmi), mean(diff(kredihacmi)))
+mydata[,diff_kredihacmi := diffkredihacmi]
+kredihacmi_square <- c(kredihacmi*kredihacmi)
+mydata[,kredihacmisquare := kredihacmi_square]
+
+kredihacmi_plot1 <- ggplot(data = mydata, aes(date, kredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kredihacmi_plot2 <- kredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkredihacmi_plot1 <- ggplot(data = mydata, aes(date, diffkredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkredihacmi_plot2 <- diffkredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkredihacmi, lag=12, type = "Ljung-Box")
+#############################################
+
+#############################################
+#konutvedigerfiyatendeksi çizdirmece
+diffkonutvedigerfiyatindeksi <- c(diff(konutvedigerfiyatindeksi), mean(diff(konutvedigerfiyatindeksi)))
+mydata[,diff_konutvedigerfiyatindeksi := diffkonutvedigerfiyatindeksi]
+konutvedigerfiyatindeksi_square <- c(konutvedigerfiyatindeksi*konutvedigerfiyatindeksi)
+mydata[,konutvedigerfiyatindeksisquare := konutvedigerfiyatindeksi_square]
+
+konutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, konutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Housing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+konutvedigerfiyatindeksi_plot2 <- konutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkonutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, diffkonutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of\nHousing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkonutvedigerfiyatindeksi_plot2 <- diffkonutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkonutvedigerfiyatindeksi, lag=12, type = "Ljung-Box")
+#############################################
+
+##############################################
+#regressors
+
+#adding a one more predictor for higher variance after 2017's end which is equal to 1 starting from 2018
+mydata[year < "2018", greater2014 := 0]
+mydata[year >= "2018", greater2014 := 1]
+
+#adding a 2 more predictor about quantile 0.05 and quantile 0.95
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.05), quant5:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.05), quant5:=1]
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.95), quant95:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.95), quant95:=1]
+
+#adding a 2 more predictor about quantile 0.25 and quantile 0.75
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.25), quant25:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.25), quant25:=1]
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.75), quant75:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.75), quant75:=1]
+
+#adding a predictor which is the mean of each month
+mydata[, ifmonth_any := c(rep(c(1:12),7), c(1:11))]
+mydata[, mean_month := mean(konutilkelsatis), by  = mydata$ifmonth_any]
+
+#adding a predictor which is the differences of each month's konutilkelsatis + 1.ayların difference ortalaması
+mydata[, diff_konutilkelsatis := c(diff(konutilkelsatis), -29730)]
+
+#adding a predictor which is the differences of each month's konutilkelsatis + 1.ayların ortalaması
+mydata[konutilkelsatis < mean(mydata$konutilkelsatis), ifgreaterthan_mean := 0]
+mydata[konutilkelsatis >= mean(mydata$konutilkelsatis), ifgreaterthan_mean := 1]
+##############################################
+
+##############################################
+#forecast modeling
+fit_month = lm(konutilkelsatis~ #usd+ortfaiz+kulcealtingr+rkge+ kredihacmi+konutvedigerfiyatindeksi+
+               ortfaiz_square+diffkulcealtingr+mydata$trend+
+               mydata$mean_month+mydata$diff_konutilkelsatis+
+               as.factor(mydata$quant5)+as.factor(mydata$quant95)+
+               as.factor(mydata$ifgreaterthan_mean)+as.factor(mydata$quant25)+
+               as.factor(mydata$quant75)+as.factor(mydata$ifmonth_jan)+
+               as.factor(mydata$ifmonth_jan)+as.factor(mydata$ifmonth_feb), mydata)
+summary(fit_month)
+checkresiduals(fit_month, lag=12)
+mean(residuals(fit_month))
+#####################################
+
+```
+
+<p></p>
+It can be seen that the model is somehow suitable due to having significantly less p-value, also 94.52% of the residuals can be explained via predictors. Just 2 predictors have not any significance, and the others are significant, some of them have less and some of them have high significance. Also, I started from more than 10000 residual errors and came that point, till 2670. When I tried to decrease it by taking the logarithm of some of the predictors, it makes the residual standar error better. Yet, it affects the residuals' normal distribution assumption. Therefore, I stayed at the point where I don't take the logarithm of neither the predicted value, nor any of the predictors. Then, prediction is ready to be prepared.
+
+
+```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "hide"}
+library(ggplot2)
+library(repr)
+library(knitr)
+library(zoo)
+library(markdown)
+library(data.table)
+library(hrbrthemes)
+library(dplyr)
+library(fpp)
+library(tidyr)
+library(viridis)
+library(GGally)
+library(lubridate)
+library(data.table)
+library(anytime)
+library(gridExtra)
+library(corrplot)
+
+rawdate <- c("2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12",
+             "2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12",
+             "2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12",
+             "2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12",
+             "2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12",
+             "2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12",
+             "2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12",
+             "2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11")
+
+konutilkelsatis <- c(39163,39521,43052,41233,46049,43345,49224,38817,46778,35363,48255,58329,
+                     40155,38074,41983,37555,41456,42620,39373,48828,53039,44499,48128,65844,
+                     37971,40662,51487,52598,49001,51202,43623,53218,43333,50564,50976,74032,	
+                     40077,47409,52374,46908,56043,49354,37829,53784,50972,61677,63467,71792,	
+                     44235,45215,56376,51988,52976,45433,53949,56498,70019,56994,59354,66661,	
+                     44363,43713,50701,47534,55502,57064,57617,49362,60219,74815,40821,69861,	
+                     31048,32648,44163,37784,37246,23265,38931,40634,51393,50181,48909,75480,	
+                     36040,37303,34089,14848,16860,58632,67937,52123,41376,36976,36658)
+
+usd <- c(1.77,1.78,1.81,1.80,1.83,1.90,1.93,1.96,2.02,1.99,2.03,2.06,
+         2.22,2.22,2.22,2.13,2.09,2.12,2.12,2.16,2.21,2.26,2.24,2.29,
+         2.33,2.46,2.59,2.65,2.65,2.71,2.70,2.85,3.01,2.93,2.88,2.92,
+         3.01,2.95,2.90,2.84,2.93,2.92,2.96,2.97,2.97,3.07,3.27,3.50,
+         3.74,3.68,3.67,3.66,3.57,3.53,3.57,3.52,3.47,3.67,3.89,3.85,
+         3.78,3.78,3.89,4.06,4.42,4.64,4.76,5.74,6.38,5.87,5.38,5.32,
+         5.38,5.27,5.45,5.75,6.06,5.82,5.68,5.63,5.72,5.79,5.74,5.85,
+         5.93,6.06,6.33,6.83,6.96,6.82,6.86,7.27,7.52,7.89,8.02)
+
+ortfaiz <- c(9.78,9.58,9.31,9.06,8.77,8.30,8.91,9.78,10.73,10.93,10.62,10.61,
+             11.30,13.03,13.51,13.52,12.94,12.29,11.46,11.06,10.91,10.75,10.91,11.01,
+             11.01,10.80,10.82,10.97,11.49,11.87,12.28,12.59,13.57,14.30,14.13,14.01,
+             14.27,14.45,14.45,14.33,13.96,13.84,13.67,12.86,12.09,12.12,11.69,11.42,
+             11.45,11.38,11.06,11.28,11.55,11.72,12.02,12.49,12.87,13.05,13.12,13.52,
+             14.14,14.68,14.79,14.83,13.88,13.10,16.86,18.99,25.18,28.95,28.63,27.82,
+             26.22,22.98,18.16,17.70,20.45,21.81,21.06,14.15,12.98,13.12,12.96,12.69,
+             11.88,11.43,11.40,11.72,11.23,9.30,9.11,11.09,14.15,15.07,15.68)
+
+kulcealtingr <- c(95.33,93.30,92.90,87.02,83.96,81.32,80.32,85.53,87.85,84.03,83.49,81.85,
+                  89.62,92.30,95.12,89.35,86.70,88.10,89.57,90.02,88.11,88.11,84.88,88.92,
+                  93.79,97.32,98.77,102.37,101.73,102.15,98.32,103.61,108.95,108.67,100.12,100.78,
+                  106.48,114.18,115.80,113.37,120.42,120.18,126.48,127.92,126.85,125.51,132.20,130.50,
+                  144.58,145.68,145.55,150.00,143.42,143.01,142.27,145.30,147.42,151.76,160.43,158.48,
+                  162.09,162.66,166.25,174.69,187.22,190.51,191.64,233.55,242.19,231.22,212.87,216.50,
+                  225.32,224.94,231.86,239.39,250.82,259.50,259.37,267.59,277.11,280.10,274.29,279.74,
+                  297.91,315.32,330.65,372.91,386.81,382.84,413.81,471.63,467.61,488.86,478.84)
+
+rkge <- c(101.90,105.90,111.90,111.50,114.30,114.20,109.00,106.80,104.70,103.90,98.70,96.70,
+          95.80,99.20,106.40,110.60,113.50,110.40,107.30,103.90,104.50,105.30,99.20,98.50,
+          101.70,103.70,103.00,109.70,111.30,105.60,104.80,102.90,98.20,97.70,102.60,100.40,
+          103.20,104.60,107.20,110.50,110.20,107.70,108.00,102.20,106.10,101.00,103.50,97.60,
+          97.10,105.90,108.90,111.20,109.20,112.40,109.50,110.70,111.60,109.50,106.30,103.30,
+          108.30,110.80,111.90,111.20,109.90,104.60,102.70,96.40,89.60,87.60,92.80,91.50,
+          93.00, 97.20,102.10,105.50,98.90,102.50,98.30,102.50,98.80,100.90,102.00,103.60,
+          104.10,106.90,99.70,66.80,76.90,92.60,100.70,106.20,105.30,108.10,103.90)
+
+
+kredihacmi <- c(717217571,732471561,751582335,765940118,806494663,836107242,859842946,876687783,901282935,902814624,921348413,955440248,
+                984689726,987725343,993340930,997542103,1003759852,1033719565,1043898016,1052826345,1093406944,1137796956,1155735773,1194725621,
+                1210366987,1241265137,1274885394,1306061983,1317820658,1347743600,1375967693,1400432554,1423915095,1410209231,1410892595,1425910874,
+                1437347116,1448894381,1449933550,1453897449,1490870255,1506929510,1517903259,1525138666,1543318451,1567079968,1628269104,1654468323,
+                1718470997,1706548811,1748365656,1776677647,1807301486,1837055961,1860360115,1872087207,1907292946,1953421330,2006860987,2004574277,
+                2017234277,2044972174,2092846426,2134888900,2220846718,2234903798,2291857143,2532302163,2430840314,2318246569,2247154666,2251646991,
+                2237478776,2278558972,2365119989,2401894835,2389456228,2385933006,2341073092,2382530701,2379180712,2406512407,2437620378,2495873380,
+                2521816695,2604845696,2720194559,2916853970,2976178101,3070154736,3184164139,3282214257,3346880569,3452292027,3426447145)
+
+konutvedigerfiyatindeksi <- c(258.91,259.55,260.14,260.56,260.46,261.19,262.35,263.24,265.05,266.00,267.16,269.55,
+                              270.87,272.11,272.73,273.39,274.37,275.02,276.55,277.42,278.79,286.99,287.58,287.95,
+                              291.19,292.52,294.63,295.84,297.19,298.09,299.08,300.13,301.88,304.33,305.97,307.28,
+                              312.53,313.65,314.16,315.33,316.53,318.01,319.08,320.59,321.92,321.16,323.94,327.01,
+                              332.97,336.91,338.37,339.09,340.46,341.51,343.02,345.46,348.08,351.34,355.72,358.47,
+                              366.86,368.78,370.39,375.15,378.73,382.64,386.86,401.77,424.11,441.70,443.79,443.54,
+                              429.81,429.84,430.98,432.57,434.32,435.43,448.94,458.10,467.95,484.55,486.29,487.44,
+                              493.27,495.65,496.96,495.39,497.06,500.54,505.21,510.03,514.76,525.13,530.64)
+##############################################
+
+
+##############################################
+#converting the character dates to date type dates and the structure of the mydata
+date <- as.Date(as.yearmon(rawdate))
+mydata <- data.table(date,usd,ortfaiz,kulcealtingr,rkge,kredihacmi,konutvedigerfiyatindeksi)
+
+##############################################
+
+
+##############################################
+#adding possible predictors to the table
+ifmonth_1 <- c(rep(c(1,0,0,0,0,0,0,0,0,0,0,0), 7),1,0,0,0,0,0,0,0,0,0,0)
+ifmonth_2 <- c(rep(c(0,1,0,0,0,0,0,0,0,0,0,0), 7),0,1,0,0,0,0,0,0,0,0,0)
+ifmonth_3 <- c(rep(c(0,0,1,0,0,0,0,0,0,0,0,0), 7),0,0,1,0,0,0,0,0,0,0,0)
+ifmonth_4 <- c(rep(c(0,0,0,1,0,0,0,0,0,0,0,0), 7),0,0,0,1,0,0,0,0,0,0,0)
+ifmonth_5 <- c(rep(c(0,0,0,0,1,0,0,0,0,0,0,0), 7),0,0,0,0,1,0,0,0,0,0,0)
+ifmonth_6 <- c(rep(c(0,0,0,0,0,1,0,0,0,0,0,0), 7),0,0,0,0,0,1,0,0,0,0,0)
+ifmonth_7 <- c(rep(c(0,0,0,0,0,0,1,0,0,0,0,0), 7),0,0,0,0,0,0,1,0,0,0,0)
+ifmonth_8 <- c(rep(c(0,0,0,0,0,0,0,1,0,0,0,0), 7),0,0,0,0,0,0,0,1,0,0,0)
+ifmonth_9 <- c(rep(c(0,0,0,0,0,0,0,0,1,0,0,0), 7),0,0,0,0,0,0,0,0,1,0,0)
+ifmonth_10 <- c(rep(c(0,0,0,0,0,0,0,0,0,1,0,0), 7),0,0,0,0,0,0,0,0,0,1,0)
+ifmonth_11 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,1,0), 7),0,0,0,0,0,0,0,0,0,0,1)
+ifmonth_12 <- c(rep(c(0,0,0,0,0,0,0,0,0,0,0,1), 7),0,0,0,0,0,0,0,0,0,0,0)
+
+mydata[, ifmonth_jan := as.factor(ifmonth_1)]
+mydata[, ifmonth_feb := as.factor(ifmonth_2)]
+mydata[, ifmonth_mar := as.factor(ifmonth_3)]
+mydata[, ifmonth_apr := as.factor(ifmonth_4)]
+mydata[, ifmonth_may := as.factor(ifmonth_5)]
+mydata[, ifmonth_jun := as.factor(ifmonth_6)]
+mydata[, ifmonth_jul := as.factor(ifmonth_7)]
+mydata[, ifmonth_aug := as.factor(ifmonth_8)]
+mydata[, ifmonth_sep := as.factor(ifmonth_9)]
+mydata[, ifmonth_oct := as.factor(ifmonth_10)]
+mydata[, ifmonth_nov := as.factor(ifmonth_11)]
+mydata[, ifmonth_dec := as.factor(ifmonth_12)]
+
+ifyear_2013 <- c(rep(1, 12), rep(0, 83))
+ifyear_2014 <- c(rep(0, 12), rep(1, 12), rep(0, 71))
+ifyear_2015 <- c(rep(0, 24), rep(1, 12), rep(0, 59))
+ifyear_2016 <- c(rep(0, 36), rep(1, 12), rep(0, 47))
+ifyear_2017 <- c(rep(0, 48), rep(1, 12), rep(0, 35))
+ifyear_2018 <- c(rep(0, 60), rep(1, 12), rep(0, 23))
+ifyear_2019 <- c(rep(0, 72), rep(1, 12), rep(0, 11))
+ifyear_2020 <- c(rep(0, 84), rep(1, 11))
+
+mydata[, ifyear_13 := as.factor(ifyear_2013)]
+mydata[, ifyear_14 := as.factor(ifyear_2014)]
+mydata[, ifyear_15 := as.factor(ifyear_2015)]
+mydata[, ifyear_16 := as.factor(ifyear_2016)]
+mydata[, ifyear_17 := as.factor(ifyear_2017)]
+mydata[, ifyear_18 := as.factor(ifyear_2018)]
+mydata[, ifyear_19 := as.factor(ifyear_2019)]
+mydata[, ifyear_20 := as.factor(ifyear_2020)]
+
+rawyears <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+mydata[, year := rawyears]
+mydata[, trend := 1:.N]
+
+mydata[, konutilkelsatis := konutilkelsatis]
+
+rawyears2 <- c(rep(2013, 12), rep(2014, 12), rep(2015, 12), rep(2016, 12),
+              rep(2017, 12),rep(2018, 12),rep(2019, 12),rep(2020, 11))
+
+mydata[, ifyear_any := rawyears2]
+##############################################
+
+##############################################
+#raw plot of the konutilkelsatis and geom_point + geom_line version
+date_df <- data.frame(date)
+usd_df <- data.frame(usd)
+ortfaiz_df <- data.frame(ortfaiz)
+kulcealtingr_df <- data.frame(kulcealtingr)
+rkge_df <- data.frame(rkge)
+kredihacmi_df <- data.frame(kredihacmi)
+konutvedigerfiyatindeksi_df <- data.frame(konutvedigerfiyatindeksi)
+konutilkelsatis_df <- data.frame(konutilkelsatis)
+year_df <- data.frame(year)
+
+konutilkelsatis_plot <- ggplot(data = mydata, aes(date, konutilkelsatis, color = year, size = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+    labs(title = "Plot of House Sales Statistics - First Sale (HSS-1S)" , 
+       x = "Date (in month)", y = "House Sales Statistics - First Sale",
+       size="Year",col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+#konutilkelsatis_plot + scale_color_gradient(low="purple", high="red")
+#############################################
+
+##############################################
+#usd plot larını çizdirmece
+
+diffusd <- c(diff(usd), mean(diff(usd)))
+mydata[,diff_usd := diffusd]
+usd_square <- c(usd*usd)
+mydata[,usdsquare := usd_square]
+
+usd_plot1 <- ggplot(data = mydata, aes(date, usd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_plot2 <- usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diff_usd_plot1 <- ggplot(data = mydata, aes(date, diffusd, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of USD/TRY Exchange Rate" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diff_usd_plot2 <- diff_usd_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+usd_square_plot1 <- ggplot(data = mydata, aes(date, usd_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "USD/TRY Exchange Rate Square" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+usd_square_plot2 <- usd_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+##############################################
+
+##############################################
+diffortfaiz <- c(diff(ortfaiz), mean(diff(ortfaiz)))
+mydata[,diff_ortfaiz := diffortfaiz]
+ortfaiz_square <- c(ortfaiz*ortfaiz)
+mydata[,ortfaizsquare := ortfaiz_square]
+
+ortfaiz_plot1 <- ggplot(data = mydata, aes(date, ortfaiz, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Weighted Average Interest Rates For Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_plot2 <- ortfaiz_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+ortfaiz_square_plot1 <- ggplot(data = mydata, aes(date, ortfaiz_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For Housing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+ortfaiz_square_plot2 <- ortfaiz_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diff(ortfaiz), lag=12, type = "Ljung-Box")
+############################################
+
+##############################################
+#kulcealtingr çizdirmece
+diffkulcealtingr <- c(diff(kulcealtingr), mean(diff(kulcealtingr)))
+mydata[,diff_kulcealtingr := diffkulcealtingr]
+kulcealtingr_square <- c(kulcealtingr*kulcealtingr)
+mydata[,kulcealtingrsquare := kulcealtingr_square]
+
+kulcealtingr_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Bullion Gold\nSelling Price TRY/Gram" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_plot2 <- kulcealtingr_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+kulcealtingr_square_plot1 <- ggplot(data = mydata, aes(date, kulcealtingr_square, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Weighted Average Interest Rates For\nHousing Loans Taken From Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kulcealtingr_square_plot2 <- kulcealtingr_square_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+#Box.test(diffkulcealtingr, lag=12, type = "Ljung-Box")
+#############################################
+
+##############################################
+#rkge çizdirmece
+diffrkge <- c(diff(rkge), mean(diff(rkge)))
+mydata[,diff_rkge := diffrkge]
+rkge_square <- c(rkge*rkge)
+mydata[,rkgesquare := rkge_square]
+
+rkge_plot1 <- ggplot(data = mydata, aes(date, rkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+rkge_plot2 <- rkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffrkge_plot1 <- ggplot(data = mydata, aes(date, diffrkge, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Real Sector Confidence Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffrkge_plot2 <- diffrkge_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffrkge, lag=12, type = "Ljung-Box")
+##############################################
+
+##############################################
+#kredihacmi çizdirmece
+diffkredihacmi <- c(diff(kredihacmi), mean(diff(kredihacmi)))
+mydata[,diff_kredihacmi := diffkredihacmi]
+kredihacmi_square <- c(kredihacmi*kredihacmi)
+mydata[,kredihacmisquare := kredihacmi_square]
+
+kredihacmi_plot1 <- ggplot(data = mydata, aes(date, kredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+kredihacmi_plot2 <- kredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkredihacmi_plot1 <- ggplot(data = mydata, aes(date, diffkredihacmi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of Monthly, Domestic Loans,\nBanking Sector (in Thousand TRY)\nfor Deposit Money Banks" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkredihacmi_plot2 <- diffkredihacmi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkredihacmi, lag=12, type = "Ljung-Box")
+#############################################
+
+#############################################
+#konutvedigerfiyatendeksi çizdirmece
+diffkonutvedigerfiyatindeksi <- c(diff(konutvedigerfiyatindeksi), mean(diff(konutvedigerfiyatindeksi)))
+mydata[,diff_konutvedigerfiyatindeksi := diffkonutvedigerfiyatindeksi]
+konutvedigerfiyatindeksi_square <- c(konutvedigerfiyatindeksi*konutvedigerfiyatindeksi)
+mydata[,konutvedigerfiyatindeksisquare := konutvedigerfiyatindeksi_square]
+
+konutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, konutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Housing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+konutvedigerfiyatindeksi_plot2 <- konutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+
+diffkonutvedigerfiyatindeksi_plot1 <- ggplot(data = mydata, aes(date, diffkonutvedigerfiyatindeksi, color = year)) + 
+  geom_line(size = 1, alpha = 0.4) + 
+  geom_point(alpha = 1) + 
+  labs(title = "Consecutive Differences of\nHousing, Water, Electricity,\nGas, and Other Fuels Price Index" , 
+       x = "Date (in month)", y = element_blank(), col="Year") +
+  theme_minimal() +
+  theme(text = element_text(family = "serif", size = 14),
+        legend.position = "bottom",
+        axis.ticks.length = unit(1, "lines"),
+        legend.margin = margin(20,20,10,15,"pt"),
+        rect = element_rect(fill = "grey92"),
+        plot.title = element_text(face = "italic"),
+        legend.box.background = element_rect(fill = "white"))
+diffkonutvedigerfiyatindeksi_plot2 <- diffkonutvedigerfiyatindeksi_plot1 + scale_color_gradient(low="orange", high="blue") + guides(fill=guide_legend(title="New Legend Title"))
+#Box.test(diffkonutvedigerfiyatindeksi, lag=12, type = "Ljung-Box")
+#############################################
+
+##############################################
+#regressors
+
+#adding a one more predictor for higher variance after 2017's end which is equal to 1 starting from 2018
+mydata[year < "2018", greater2014 := 0]
+mydata[year >= "2018", greater2014 := 1]
+
+#adding a 2 more predictor about quantile 0.05 and quantile 0.95
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.05), quant5:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.05), quant5:=1]
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.95), quant95:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.95), quant95:=1]
+
+#adding a 2 more predictor about quantile 0.25 and quantile 0.75
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.25), quant25:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.25), quant25:=1]
+mydata[konutilkelsatis <= quantile(konutilkelsatis,0.75), quant75:=0]
+mydata[konutilkelsatis > quantile(konutilkelsatis,0.75), quant75:=1]
+
+#adding a predictor which is the mean of each month
+mydata[, ifmonth_any := c(rep(c(1:12),7), c(1:11))]
+mydata[, mean_month := mean(konutilkelsatis), by  = mydata$ifmonth_any]
+
+#adding a predictor which is the differences of each month's konutilkelsatis + 1.ayların difference ortalaması
+mydata[, diff_konutilkelsatis := c(diff(konutilkelsatis), -29730)]
+
+#adding a predictor which is the differences of each month's konutilkelsatis + 1.ayların ortalaması
+mydata[konutilkelsatis < mean(mydata$konutilkelsatis), ifgreaterthan_mean := 0]
+mydata[konutilkelsatis >= mean(mydata$konutilkelsatis), ifgreaterthan_mean := 1]
+##############################################
+
+##############################################
+#forecast modeling
+fit_month = lm(konutilkelsatis~ #usd+ortfaiz+kulcealtingr+rkge+ kredihacmi+konutvedigerfiyatindeksi+
+               ortfaiz_square+diffkulcealtingr+mydata$trend+
+               mydata$mean_month+mydata$diff_konutilkelsatis+
+               as.factor(mydata$quant5)+as.factor(mydata$quant95)+
+               as.factor(mydata$ifgreaterthan_mean)+as.factor(mydata$quant25)+
+               as.factor(mydata$quant75)+as.factor(mydata$ifmonth_jan)+
+               as.factor(mydata$ifmonth_jan)+as.factor(mydata$ifmonth_feb), mydata)
+##############################################
+
+##############################################
+
+#forecastların actual valuelar ile karşılaştırılması
+dat <- data.table(konutilkelsatis, fitted(fit_month))
+ggplot(dat, aes(x = konutilkelsatis, y = fitted(fit_month)))+
+  geom_point()+
+  ylab("Fitted Values")+
+  xlab("Actual Valeus")+
+  ggtitle("Fitted vs. Actual Values") + geom_abline(intercept = 0, slope = 1)
+summary(fit_month)
+
+#####################################
+#View(mydata)
+#mydata = rbind(mydata,data.table(date=as.Date("2020-12-01")),fill=T)
+
+#mydata[96, ortfaizsquare := mean(ortfaiz_square)]
+#mydata[96, diff_kulcealtingr := mean(diffkulcealtingr)]
+#mydata[96, trend := 96]
+#mydata[96, mean_month := 68857]
+#mydata[96, diff_konutilkelsatis := -29730]
+#mydata[96, quant5 := 0]
+#mydata[96, quant95 := 0]
+#mydata[96, ifgreaterthan_mean := 1]
+#mydata[96, quant25 := 0]
+#mydata[96, quant75 := 0]
+#mydata[96, ifmonth_jan := as.factor(0)]
+#mydata[96, ifmonth_jan := as.factor(0)]
+#mydata[96, ifmonth_feb := as.factor(0)]
+
+#mydata[96, konutilkelsatis := 36658]
+#mydata[96, konutilkelsatis := predict(fit_month, mydata[trend == 96])]
+#predict(fit_month,mydata[is.na(konutilkelsatis)==T])
+
+```
+<p></p>
+Forecast model is done by choosing the necessary predictors. While choosing the predictors, we have looked at the result os Ljung-Box statistic, which indicates the overall randomness, a general autocorrelation indicator rather than being an indicator at specific lags, and if any seem to be autocorrelated, then we used this predictor either its squared value or difference at the forecast model. You might say that even we take the difference and add the mean of the difference at the end of the differenced predictor, why do we have not such correlation between the HSS-1S and other predictors? Yes, it is true, we have not much correlation but by making them stationary and taking the squares, then we can eliminate the correlation between predictors, which causes us a great autocorrelation while predicting and modeling. Also, I have checked and modeled with the differenced and squared predictors and thankfully say that at these conditions (in a squared form and differenced form), model gives a much better result. 
+<p></p>
+This result says that we have a great amount of significant predictors, besides some less significant and insignificant predictors. The predictors plotted above are thought that each one may affect the model, but I said that "at first glance" they seem to be reasonable, because some of them are not such important.
+<p></p>
+As you can see, I tried to reduce the affects of seasonality by adding each month as a factor, it doesn't affect too much at the end, because we don't have much seasonality. Therefore I excluded some predictors which are related with seasonality besides the some of the others. Also, I checked the 5th, 25th, 75th , 95th quantiles, and mean of the HSS-1S values at each row in the mydata whether HSS-1S is greater than these quantiles and mean or not due to get a predictor from the data itself. Some of them seem significant and some of them are not.
+<p></p>
+When I excluded the unimportant ones at this model, sometimes the lm() function have found some of the insignificant ones as significant and sometimes not. Therefore, I tried to not exclude with somehow smaller t-value-owned predictors in order not to throw away getting a better result. Then, I got this model and result as final result. Also, 94.52% of the variance of the data can be explained by our predictors and the model is reasonable due to having so less p-value.
+<p></p>
+Furthermore, when we check the residuals by Breusch-Godfrey test, the result says that the mean is so close to zero (4.459591e-15) and autocorrelation borders are not passed by residuals at any of the lags. Also, the residuals should seem to be somehow normally distributed and as like desired.Finally, the p-value of the Breusch-Godfrey test shows that the autocorrelation between residuals doesn't exist.
+<p></p>
+Also, the predicted values against the data itself is graphed and they simile to each each other. Even they seem similar to the exact values, I can't do the prediction part even I tried to solve the problem for 7 hours that have endlessly drived me mad. Yet, I didn't find the prediction but I tried to fill the 96th row of mydata like I want and 12th month required and tried to make the PC predict the HSS-1S value at 12th month in 2020 gropely. Yet, it didn't work again. Unfortunately.
+
