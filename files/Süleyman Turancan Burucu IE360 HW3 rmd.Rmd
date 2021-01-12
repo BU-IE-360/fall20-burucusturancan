@@ -3304,7 +3304,7 @@ Furthermore, when we check the residuals by Breusch-Godfrey test, the result say
 Also, the predicted values against the data itself is graphed and they simile to each each other. Even they seem similar to the exact values, I can't do the prediction part even I tried to solve the problem for 7 hours that have endlessly drived me mad. Yet, I didn't find the prediction but I tried to fill the 96th row of mydata like I want and 12th month required and tried to make the PC predict the HSS-1S value at 12th month in 2020 gropely. Yet, it didn't work again. Unfortunately.
 <p></p>
 ## **5. After Discussing and Deciding What Should Be Done for Prediction Problem**
->Fortunately, after questioning the problem and trying to find an answer with Mr.Baydoğan and TA  Elif Konyar, it was decided to meet with TA at 12.01.2021 and the problem drived me mad about predict() function has been solved. Also, the prediction is found according to model which has been changed by excluding one nonstationary predictor and 2 other predictors. The last model, the predicted value and the predicted value-actual value plot can be seen below:
+>Fortunately, after questioning the problem and trying to find an answer with Mr.Baydoğan and TA  Elif Konyar, it was decided to meet with TA at 12.01.2021 and the problem drived me mad about predict() function has been solved. Also, the prediction is found according to model which has been changed by excluding one nonstationary predictor and 2 other predictors. The last model, the predicted value, predicted value-actual value plot, and the residuals' plots can be seen below:
 
 ```{r, include = TRUE, echo = FALSE, warning= FALSE, error = FALSE, message = FALSE, results = "markup"}
 library(ggplot2)
@@ -3845,4 +3845,7 @@ ggplot(dat, aes(x = konutilkelsatis, y = fitted(fit_month)))+
 
 ##############################################
 
+##############################################
+checkresiduals(fit_month)
+##############################################
 ```
