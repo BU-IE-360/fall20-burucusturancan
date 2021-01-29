@@ -1,0 +1,441 @@
+---
+title: "Homework 4 Süleyman Turancan Burucu"
+author: "Süleyman Turancan Burucu"
+date: "1/29/2021"
+output: html_document
+---
+# Stationarity Study and ARIMA Modeling of Hourly-Averaged Daily Electricity Consumption
+## **1. Introduction and Stationarity Study**
+
+>In brief, this work includes what is EPIAS, the meaning of stationarity, how to make the electricity consumption data stationary, and how to implement an ARIMA model for electricity consumption amounts together with two-week predictions.
+
+<p>To begin with, stationarity means that statistical properties of the process doesn't change over time. Shortly, the mean, and the variance don't change over time. Specifically for this model, the electricity consumption is analyzed in daily period by dividing the daily electricity consumption of Turkey to 24, in hourly basis.</p>
+
+<p>As a whole, the electricity consumption traces a seasonal period which can be seen easily, it seems like sinusoidal wave. Sometimes this appearance is somehow corrupted due to possible reasons such as time of the day, being in a lockdown period, being in a weekday or not, being in summer or winter, etc. These reasons apparently can be increased. Thus, stationarity of the process can not be maintained.</p>
+
+<p>To this variational respect, electricity production and distribution are a bit manipulative. In other words, if it is not regulated by some rules, then uncontrolled and volatile-pricing authorities can be sprung. Therefore, this manipulative disposition is precluded by EPIAS, which is the regulatory authority for energy market.</p>
+
+<p>This variational nature of the electricity consumption, theoretical models are being produced in accordance with statistical knowledge and time series approaches. Also, modeling, to make forecasts, has become widespread and being used by so many energy production and distribution companies and also used for academical purposes. Modeling can be done by different modeling techniques. For this work, the ARIMA model is going to be examined after stationary is explained. When it comes to being stationary, we need to make sure that the data that we are going to make prediction for should be made stationary in order to get correct predictions. To start, the hourly and daily electricity consumption plot is given below:</p>
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE, echo = FALSE}
+library(lubridate)
+library(readxl)
+library(zoo)
+library(data.table)
+library(urca)
+require(jsonlite)
+require(httr)
+require("fpp")
+require("ggplot2")
+require("forecast")
+require("stats")
+require("xlsx")
+require("lubridate")
+require("readr")
+
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Homeworks/4")
+
+hw4consumption <- as.data.table(read_excel("hw4data.xlsx"))
+
+
+#hourly data
+colnames(hw4consumption) <- c("date", "hour", "consumption")
+
+hw4consumption[,date:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+hw4consumption$hour <- as.integer(hw4consumption$hour)
+
+whichweek<-rep(1:209, each = 168)
+asd <-rep(210,144)
+hw4consumption[,woy:=c(whichweek,asd)]
+
+hw4consumption[,woy:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+ggplot(hw4consumption, aes(x=hw4consumption$date, y=hw4consumption$consumption)) +
+  geom_line(size = 0.6, color="darkred", alpha = 0.7) + 
+  geom_point(size = 0.2, color="red", alpha = 0.5) +
+  scale_x_date(date_breaks = "3 months") +
+  labs(title = "Hourly Electricity Consumption from 2017-01-01 to 2021-01-01", 
+       x = "Date",y = "Amount of Elctricity(mWh)") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  theme_classic() 
+
+#daily data
+daily_consumption=as.data.table(hw4consumption[,mean(consumption), by = date])
+
+colnames(daily_consumption) <- c("date", "consumption")
+
+daily_consumption[,lag1 := shift(consumption,1)]
+daily_consumption[,lag7 := shift(consumption,7)]
+
+diff1raw <- c(NA,diff(daily_consumption$consumption,1))
+diff7raw <- c(NA,NA,NA,NA,NA,NA,NA,diff(daily_consumption$consumption,7))
+
+daily_consumption[,diff1 := diff1raw]
+daily_consumption[,diff7 := diff7raw]
+
+
+ggplot(daily_consumption, aes(x=daily_consumption$date, y=daily_consumption$consumption)) +
+  geom_line(size = 0.8, color="darkblue", alpha = 0.7) + 
+  geom_point(size = 1.5, color="orange", alpha = 1) +
+  scale_x_date(date_breaks = "3 months") +
+  labs(title = "Hourly Average Daily Electricity Consumption from 2017-01-01 to 2021-01-01", 
+       x = "Date",
+       y = "Amount of Elctricity(mWh)") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  theme_classic() #it doesn't seem stationary due to seasonality, so we can do differencing!!!!
+```
+
+<p>As you can see from the above, the electricity consumption data doesn't seem stationary, due to seasonality. Also, we should check the autocorrelation for hourly and daily data (hourly data is also given in order to have a chance for looking in detail) to make sure that is there any seasonality or not. The first ACF and PACF plots are for hourly consumption and the last ACF and PACF plots are for daily consumption:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE, echo = FALSE}
+library(lubridate)
+library(readxl)
+library(zoo)
+library(data.table)
+library(urca)
+require(jsonlite)
+require(httr)
+require("fpp")
+require("ggplot2")
+require("forecast")
+require("stats")
+require("xlsx")
+require("lubridate")
+require("readr")
+
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Homeworks/4")
+
+hw4consumption <- as.data.table(read_excel("hw4data.xlsx"))
+
+
+#hourly data
+colnames(hw4consumption) <- c("date", "hour", "consumption")
+
+hw4consumption[,date:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+hw4consumption$hour <- as.integer(hw4consumption$hour)
+
+whichweek<-rep(1:209, each = 168)
+asd <-rep(210,144)
+hw4consumption[,woy:=c(whichweek,asd)]
+
+hw4consumption[,woy:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+#daily data
+daily_consumption=as.data.table(hw4consumption[,mean(consumption), by = date])
+
+colnames(daily_consumption) <- c("date", "consumption")
+
+daily_consumption[,lag1 := shift(consumption,1)]
+daily_consumption[,lag7 := shift(consumption,7)]
+
+diff1raw <- c(NA,diff(daily_consumption$consumption,1))
+diff7raw <- c(NA,NA,NA,NA,NA,NA,NA,diff(daily_consumption$consumption,7))
+
+daily_consumption[,diff1 := diff1raw]
+daily_consumption[,diff7 := diff7raw]
+
+acf(hw4consumption$consumption)
+pacf(hw4consumption$consumption)
+acf(daily_consumption$consumption)
+pacf(daily_consumption$consumption)
+```
+<p>It can be seen that, even in daily data, there is asn obvious seasonality, which can be seen from the first ACF's shape that seems like a wave. Also, there is significant autocorrelation at lag-24, due to nature of day which consists of 24 hour. Besides, the autocorrelation can be seen also at daily consumption's ACF and PACF plots, ACF plot of which indicates significant autocorrelation at lag-7, due to the nature of week consisted of 7 days. Therefore, the daily consumption data should be made stationary. The first thing that we can do is differencing. For taking the difference, we must be sure that the data is not stationary. This sureness can also be provided by checking the KPSS Test's results of related data by typing "summary(ur.kpss(related_data))" to the computer. That code shows that whether we need differencing or not. Though, we are sure that daily consumption is not stationary and we don't need to check the results of the KPSS Test. Yet, this results are provided the below of the plots to make sure that whether the differenced data is stationary or not. Let's try to make differencing lag-7 and check their ACF and PACF plots together with checking the differenced data's plot since we can get weekly pattern at ACF and PACF at differenced data:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE, echo = FALSE}
+library(lubridate)
+library(readxl)
+library(zoo)
+library(data.table)
+library(urca)
+require(jsonlite)
+require(httr)
+require("fpp")
+require("ggplot2")
+require("forecast")
+require("stats")
+require("xlsx")
+require("lubridate")
+require("readr")
+
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Homeworks/4")
+
+hw4consumption <- as.data.table(read_excel("hw4data.xlsx"))
+
+
+#hourly data
+colnames(hw4consumption) <- c("date", "hour", "consumption")
+
+hw4consumption[,date:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+hw4consumption$hour <- as.integer(hw4consumption$hour)
+
+whichweek<-rep(1:209, each = 168)
+asd <-rep(210,144)
+hw4consumption[,woy:=c(whichweek,asd)]
+
+hw4consumption[,woy:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+#daily data
+daily_consumption=as.data.table(hw4consumption[,mean(consumption), by = date])
+
+colnames(daily_consumption) <- c("date", "consumption")
+
+daily_consumption[,lag1 := shift(consumption,1)]
+daily_consumption[,lag7 := shift(consumption,7)]
+
+diff1raw <- c(NA,diff(daily_consumption$consumption,1))
+diff7raw <- c(NA,NA,NA,NA,NA,NA,NA,diff(daily_consumption$consumption,7))
+
+daily_consumption[,diff1 := diff1raw]
+daily_consumption[,diff7 := diff7raw]
+
+#kpss test of daily consumption
+acf(diff(daily_consumption$consumption,7))
+pacf(diff(daily_consumption$consumption,7))
+
+ggplot(daily_consumption, aes(x=daily_consumption$date, y=daily_consumption$diff7)) +
+  geom_line(size = 0.8, color="black", alpha = 0.7) + 
+  geom_point(size = 1.5, color="orange", alpha = 1) +
+  scale_x_date(date_breaks = "3 months") +
+  labs(title = "Weekly Differenced Electricity Consumption from 2017-01-01 to 2021-01-01", 
+       x = "Date",
+       y = "Amount of Elctricity(mWh)") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  theme_classic() 
+summary(ur.kpss(diff(daily_consumption$consumption,7)))
+```
+
+<p>Let's try to make differencing at lag-1 and check their ACF and PACF plots together with checking the differenced data's plot since we can get 1-day lagged pattern at ACF and PACF at differenced data. Results of the KPSS Test are provided below of the plots:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE, echo = FALSE}
+library(lubridate)
+library(readxl)
+library(zoo)
+library(data.table)
+library(urca)
+require(jsonlite)
+require(httr)
+require("fpp")
+require("ggplot2")
+require("forecast")
+require("stats")
+require("xlsx")
+require("lubridate")
+require("readr")
+
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Homeworks/4")
+
+hw4consumption <- as.data.table(read_excel("hw4data.xlsx"))
+
+
+#hourly data
+colnames(hw4consumption) <- c("date", "hour", "consumption")
+
+hw4consumption[,date:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+hw4consumption$hour <- as.integer(hw4consumption$hour)
+
+whichweek<-rep(1:209, each = 168)
+asd <-rep(210,144)
+hw4consumption[,woy:=c(whichweek,asd)]
+
+hw4consumption[,woy:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+#daily data
+daily_consumption=as.data.table(hw4consumption[,mean(consumption), by = date])
+
+colnames(daily_consumption) <- c("date", "consumption")
+
+daily_consumption[,lag1 := shift(consumption,1)]
+daily_consumption[,lag7 := shift(consumption,7)]
+
+diff1raw <- c(NA,diff(daily_consumption$consumption,1))
+diff7raw <- c(NA,NA,NA,NA,NA,NA,NA,diff(daily_consumption$consumption,7))
+
+daily_consumption[,diff1 := diff1raw]
+daily_consumption[,diff7 := diff7raw]
+
+#kpss test of daily consumption
+acf(diff(daily_consumption$consumption,1))
+pacf(diff(daily_consumption$consumption,1))
+#diff1 graph
+ggplot(daily_consumption, aes(x=daily_consumption$date, y=daily_consumption$diff1)) +
+  geom_line(size = 0.8, color="black", alpha = 0.7) + 
+  geom_point(size = 1.5, color="orange", alpha = 1) +
+  scale_x_date(date_breaks = "3 months") +
+  labs(title = "Daily Differenced Electricity Consumption from 2017-01-01 to 2021-01-01", 
+       x = "Date",
+       y = "Amount of Elctricity(mWh)") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  theme_classic()  #bu daha stationary olduğu için daily differenced ın  
+                   #kpss testi daha iyi, ve daha stationary
+summary(ur.kpss(diff(daily_consumption$consumption,1)))
+```
+
+<p>As a result, to make the data stationary, differencing seems to work for both lags. When the results of KPSS Tests are checked, the test statistic of each one is less than for any of the critical values, meaning that the data we are struggling with are "stationary". Also, it can be argued that the 7-lagged differencing has a better test statistic value indicating how much stationary the data, but it can be neglected due to not having so much difference among these test statistic values.</p>
+
+## **2. ARIMA Study and Forecasting**
+<p>In ARIMA modeling, the model is applied to some statistical techniques to be explained under some topics, which are autoregression, differencing, and moving average. These are applied at some lags called (p,d,q) corresponding the lag values for autoregression, differencing, and moving average, respectively. Also, ARIMA modeling has seasonal ARIMA (P,D,Q) corresponding autoregression, differencing, and moving average of seasonal variables, respectively.</p>
+
+<p>Let's find the best model by auto.arima() function and develop it by applying seasonal ARIMA and calculate the WMAPE of forecasted values:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE, echo = FALSE}
+library(lubridate)
+library(readxl)
+library(zoo)
+library(data.table)
+library(urca)
+require(jsonlite)
+require(httr)
+require("fpp")
+require("ggplot2")
+require("forecast")
+require("stats")
+require("xlsx")
+require("lubridate")
+require("readr")
+
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Homeworks/4")
+
+hw4consumption <- as.data.table(read_excel("hw4data.xlsx"))
+
+
+#hourly data
+colnames(hw4consumption) <- c("date", "hour", "consumption")
+
+hw4consumption[,date:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+hw4consumption$hour <- as.integer(hw4consumption$hour)
+
+whichweek<-rep(1:209, each = 168)
+asd <-rep(210,144)
+hw4consumption[,woy:=c(whichweek,asd)]
+
+hw4consumption[,woy:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+#daily data
+daily_consumption=as.data.table(hw4consumption[,mean(consumption), by = date])
+
+colnames(daily_consumption) <- c("date", "consumption")
+
+daily_consumption[,lag1 := shift(consumption,1)]
+daily_consumption[,lag7 := shift(consumption,7)]
+
+diff1raw <- c(NA,diff(daily_consumption$consumption,1))
+diff7raw <- c(NA,NA,NA,NA,NA,NA,NA,diff(daily_consumption$consumption,7))
+
+daily_consumption[,diff1 := diff1raw]
+daily_consumption[,diff7 := diff7raw]
+
+#arima
+modelauto = auto.arima(daily_consumption$diff1, seasonal = TRUE, optim.control = list(maxit = 5000))
+modelauto_improved = arima(daily_consumption$diff1, order = c(5,0,2), 
+                           seasonal = list(order = c(0,0,1), period = 7))
+#arima forecasts
+diffforecast = forecast(modelauto_improved,h=16)
+print(diffforecast)
+
+AIC(modelauto)
+BIC(modelauto)
+AIC(modelauto_improved)
+BIC(modelauto_improved)
+```
+
+<p>Point forecasts column is the forecasted values of the difference between consecutive days, i.e. 1-day lag difference forecasts of daily electricity consumption values. Also, the model is improved by adding seasonal ARIMA to what auto.arima() has found and the forecasted values are calculated with this improved algorithm, which has better AIC and BIC values. AIC and BIC values are shown at the below of the forecasts in the order of AIC & BIC values of auto.arima() model and AIC & BIC values of seasonal ARIMA added version. As we can see, the seasonal ARIMA values are better than what auto.arima() found. After forecasting the difference values, I calculated daily consumption values by adding difference values consecutively to the last consumption value. Also, I have checked the WMAPE values with exact values gotten from EPIAS and showed the results below:</p>
+
+```{r, eval = TRUE, error=FALSE, warning=FALSE, message = FALSE, fig.width = 12, include = TRUE, echo = FALSE}
+library(lubridate)
+library(readxl)
+library(zoo)
+library(zoom)
+library(data.table)
+library(urca)
+require(jsonlite)
+require(httr)
+require("fpp")
+require("ggplot2")
+require("forecast")
+require("stats")
+require("xlsx")
+require("lubridate")
+require("readr")
+
+setwd("D:/Lectures/(2020-2021) Lectures Junior/IE360/Homeworks/4")
+
+hw4consumption <- as.data.table(read_excel("hw4data.xlsx"))
+
+
+#hourly data
+colnames(hw4consumption) <- c("date", "hour", "consumption")
+
+hw4consumption[,date:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+hw4consumption$hour <- as.integer(hw4consumption$hour)
+
+whichweek<-rep(1:209, each = 168)
+asd <-rep(210,144)
+hw4consumption[,woy:=c(whichweek,asd)]
+
+hw4consumption[,woy:=as.Date(hw4consumption$date,'%d.%m.%Y')]
+
+#daily data
+daily_consumption=as.data.table(hw4consumption[,mean(consumption), by = date])
+
+colnames(daily_consumption) <- c("date", "consumption")
+
+daily_consumption[,lag1 := shift(consumption,1)]
+daily_consumption[,lag7 := shift(consumption,7)]
+
+diff1raw <- c(NA,diff(daily_consumption$consumption,1))
+diff7raw <- c(NA,NA,NA,NA,NA,NA,NA,diff(daily_consumption$consumption,7))
+
+daily_consumption[,diff1 := diff1raw]
+daily_consumption[,diff7 := diff7raw]
+
+#arima
+modelauto = auto.arima(daily_consumption$diff1, seasonal = TRUE, optim.control = list(maxit = 5000))
+modelauto_improved = arima(daily_consumption$diff1, order = c(5,0,2), 
+                           seasonal = list(order = c(0,0,1), period = 7))
+
+#arima forecasts
+diffforecast = forecast(modelauto_improved,h=16)
+
+forecasts <- c(36358.7227,35448.8905,38310.3338,39391.81,38116.7024,
+        38784.819,40796.5233,39384.8259,37902.3468,39654.6568,40290.5836,
+        38277.8004,38660.1224,40558.1173,39359.2973)
+actuals <- c(34781.56125,31841.90125,36431.46292,36897.99375,37409.86958,
+             38056.0525,38170.38167,35667.34583,32557.95792,38447.88708,
+             39723.73333,39960.9225,39791.06708,38902.97375,35635.69958)
+number <- c(1:15)
+dates <- c("2021-01-09","2021-01-10","2021-01-11","2021-01-12","2021-01-13",
+           "2021-01-14","2021-01-15","2021-01-16","2021-01-17","2021-01-18",
+           "2021-01-19","2021-01-20","2021-01-21","2021-01-22","2021-01-23")
+
+dtarima <- data.table(dates,forecasts,actuals,number)
+
+
+for(i in c(1:14)){
+  output <- function(actuals, forecasts){
+    n=i
+    error = actuals-forecasts
+    mean=mean(actuals)
+    sd=sd(actuals)
+    bias = sum(error)/sum(actuals)
+    mape = sum(abs(error/actuals))/n
+    mad = sum(abs(error))/n
+    wmape = mad/mean
+    l = data.frame(n,mean,sd,bias,mape,mad,wmape)
+    return(l)
+  }
+  print(output(dtarima$actuals[i], dtarima$forecasts[i]))
+}
+
+plot(dtarima$forecasts, type = "l", xlab = "Time Index", 
+     ylab = "Daily Elctricity Consumption", main="Actuals & Forecasted Values",
+     xlim=c(0,15),ylim=c(32000,42000))
+points(dtarima$actuals, type = "l", col = 2)
+legend("bottomright", legend = paste(c("Forecasted", "Actual")), col = 1:2, pch = 19, bty = "n")
+```
+
+<p>As a result, the weighted MAPE and MAPE results seem useful and are small which is useful for us to make predictions with small errors.</p>

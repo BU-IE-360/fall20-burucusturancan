@@ -9,3 +9,5 @@
 [Here](files/Rmd-file-of-HW2-IE360.html) is the Homework 2 report.
 
 [Here](files/Süleyman-Turancan-Burucu-IE360-HW3-rmd) is the Homework 3 report.
+
+[Here](files/Homework-4-Rmd.html) is the Homework 4 report.
